@@ -86,6 +86,7 @@
 
   <div id="content"></div>
 
+<!-- ... (other HTML code) ... -->
 <script>
   const addressBar = document.getElementById('address-bar');
   const goButton = document.getElementById('go-button');
@@ -95,17 +96,32 @@
 
   let internetCheckInterval;
   let currentIframeUrl = '';
+  let blacklistedSites = [];
+
+  // Fetch the list of blacklisted sites from GitHub JSON file
+  fetch('https://raw.githubusercontent.com/wicorn29/BrowsiGo/main/blacklist.json')
+    .then(response => response.json())
+    .then(data => {
+      blacklistedSites = data;
+    })
+    .catch(error => {
+      console.error('Failed to fetch blacklisted sites:', error);
+    });
 
   goButton.addEventListener('click', () => {
     clearInterval(internetCheckInterval);
 
     const url = addressBar.value;
     if (isValidUrl(url)) {
-      noInternetMessage.style.display = 'none';
-      welcomeMessage.style.display = 'none';
-      contentDiv.innerHTML = `<iframe src="${url}" style="width: 100%; height: 100%; border: none;"></iframe>`;
-      currentIframeUrl = url;
-      updatePageTitle(url);
+      if (isBlacklisted(url)) {
+        displayErrorMessage(getBlacklistedErrorMessage(url));
+      } else {
+        noInternetMessage.style.display = 'none';
+        welcomeMessage.style.display = 'none';
+        contentDiv.innerHTML = `<iframe src="${url}" style="width: 100%; height: 100%; border: none;"></iframe>`;
+        currentIframeUrl = url;
+        updatePageTitle(url);
+      }
     } else {
       noInternetMessage.style.display = 'none';
       welcomeMessage.style.display = 'none';
@@ -123,6 +139,22 @@
     } catch (error) {
       return false;
     }
+  }
+
+  // Function to check if the URL is blacklisted
+  function isBlacklisted(url) {
+    return blacklistedSites.some(site => site.url === url);
+  }
+
+  // Function to get the error message for a blacklisted site
+  function getBlacklistedErrorMessage(url) {
+    const blacklistedSite = blacklistedSites.find(site => site.url === url);
+    return blacklistedSite ? blacklistedSite.errorMessage : 'This site is blocked.';
+  }
+
+  // Function to display an error message
+  function displayErrorMessage(message) {
+    contentDiv.innerHTML = `<p style="color: red; text-align: center;">${message}</p>`;
   }
 
   // Function to check internet connectivity
@@ -166,6 +198,8 @@
   // Initial check when the page loads
   checkInternetConnection();
 </script>
+<!-- ... (other JavaScript code) ... -->
+
 
 </body>
 </html>
