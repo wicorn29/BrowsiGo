@@ -1,0 +1,11 @@
+[
+  {
+    "url": "https://www.example.com",
+    "errorMessage": "Access to this site is blocked."
+  },
+  {
+    "url": "https://www.google.com",
+    "errorMessage": "This sight can't be loaded because of security problems. We are working on fixing this!"
+  }
+  // Add more blacklisted sites and error messages as needed
+]
