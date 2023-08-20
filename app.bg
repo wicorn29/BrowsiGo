@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>BrowsiGo</title>
+  <title>BrowsiGO</title>
   <style>
     body {
       margin: 0;
@@ -10,30 +10,6 @@
       flex-direction: column;
       height: 100vh;
       font-family: Arial, sans-serif;
-    }
-
-    #welcome-message {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background-color: #f0f0f2;
-      padding: 30px;
-      text-align: center;
-    }
-
-    #no-internet-message {
-      display: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      text-align: center;
-      padding-top: 50vh;
-      z-index: 9999;
     }
 
     #search-bar {
@@ -67,139 +43,54 @@
       height: 100%;
       border: none;
     }
+
+    #error-message {
+      display: none;
+      color: red;
+      text-align: center;
+      padding: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <div id="welcome-message">
-    <h2>Welcome to BrowsiGo!</h2>
-    <p>This is a simple Electron browser application. Enter a URL above and click "Go" to start browsing.</p>
-  </div>
-
-  <div id="no-internet-message">
-    <p>No Internet Connection</p>
-  </div>
-
   <div id="search-bar">
     <input type="text" id="address-bar" placeholder="Enter URL">
     <button id="go-button">Go</button>
   </div>
-
   <div id="content"></div>
+  <div id="error-message">Invalid URL. Please enter a valid URL.</div>
 
-<!-- ... (other HTML code) ... -->
-<script>
-  const addressBar = document.getElementById('address-bar');
-  const goButton = document.getElementById('go-button');
-  const contentDiv = document.getElementById('content');
-  const welcomeMessage = document.getElementById('welcome-message');
-  const noInternetMessage = document.getElementById('no-internet-message');
+  <script>
+    const addressBar = document.getElementById('address-bar');
+    const goButton = document.getElementById('go-button');
+    const contentDiv = document.getElementById('content');
+    const errorMessage = document.getElementById('error-message');
 
-  let internetCheckInterval;
-  let currentIframeUrl = '';
-  let blacklistedSites = [];
-
-  // Fetch the list of blacklisted sites from GitHub JSON file
-  fetch('https://raw.githubusercontent.com/wicorn29/BrowsiGo/main/blacklist.json')
-    .then(response => response.json())
-    .then(data => {
-      blacklistedSites = data;
-    })
-    .catch(error => {
-      console.error('Failed to fetch blacklisted sites:', error);
+    goButton.addEventListener('click', () => {
+      const url = addressBar.value;
+      if (isValidUrl(url)) {
+        errorMessage.style.display = 'none';
+        contentDiv.innerHTML = `<iframe src="${url}" style="width: 100%; height: 100%; border: none;"></iframe>`;
+      } else {
+        errorMessage.style.display = 'block';
+        contentDiv.innerHTML = ''; // Clear content if URL is invalid
+      }
     });
 
-  goButton.addEventListener('click', () => {
-    clearInterval(internetCheckInterval);
-
-    const url = addressBar.value;
-    if (isValidUrl(url)) {
-      if (isBlacklisted(url)) {
-        displayErrorMessage(getBlacklistedErrorMessage(url));
-      } else {
-        noInternetMessage.style.display = 'none';
-        welcomeMessage.style.display = 'none';
-        contentDiv.innerHTML = `<iframe src="${url}" style="width: 100%; height: 100%; border: none;"></iframe>`;
-        currentIframeUrl = url;
-        updatePageTitle(url);
+    // Helper function to check if URL is valid
+    function isValidUrl(url) {
+      try {
+        new URL(url);
+        return true;
+      } catch (error) {
+        return false;
       }
-    } else {
-      noInternetMessage.style.display = 'none';
-      welcomeMessage.style.display = 'none';
-      contentDiv.innerHTML = ''; // Clear content if URL is invalid
-      currentIframeUrl = '';
-      updatePageTitle('');
-    }
-  });
-
-  // Helper function to check if URL is valid
-  function isValidUrl(url) {
-    try {
-      new URL(url);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  // Function to check if the URL is blacklisted
-  function isBlacklisted(url) {
-    return blacklistedSites.some(site => site.url === url);
-  }
-
-  // Function to get the error message for a blacklisted site
-  function getBlacklistedErrorMessage(url) {
-    const blacklistedSite = blacklistedSites.find(site => site.url === url);
-    return blacklistedSite ? blacklistedSite.errorMessage : 'This site is blocked.';
-  }
-
-  // Function to display an error message
-  function displayErrorMessage(message) {
-    contentDiv.innerHTML = `<p style="color: red; text-align: center;">${message}</p>`;
-  }
-
-  // Function to check internet connectivity
-  function checkInternetConnection() {
-    const online = navigator.onLine;
-    if (!online) {
-      noInternetMessage.style.display = 'block';
-    } else {
-      noInternetMessage.style.display = 'none';
-    }
-  }
-
-  // Function to update the main page's title
-  function updatePageTitle(iframeUrl) {
-    if (!iframeUrl) {
-      document.title = 'BrowsiGo';
-      return;
     }
 
-    const iframe = document.createElement('iframe');
-    iframe.src = iframeUrl;
-    iframe.style.display = 'none';
-    
-    iframe.onload = function () {
-      const iframeTitle = iframe.contentDocument.querySelector('title');
-      if (iframeTitle) {
-        document.title = `BrowsiGo: ${iframeTitle.textContent}`;
-      } else {
-        document.title = 'BrowsiGo';
-      }
-      
-      iframe.remove();
-    };
-    
-    document.body.appendChild(iframe);
-  }
-
-  // Check for internet connection every 1 second
-  internetCheckInterval = setInterval(checkInternetConnection, 1000);
-
-  // Initial check when the page loads
-  checkInternetConnection();
-</script>
-<!-- ... (other JavaScript code) ... -->
-
-
+    // Set homepage to example.com
+    addressBar.value = 'https://www.example.com';
+    goButton.click(); // Load example.com on startup
+  </script>
 </body>
 </html>
