@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BrowsiGo</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+
+    #search-bar {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      background-color: #333;
+      color: white;
+    }
+
+    #address-bar {
+      flex: 1;
+      padding: 5px;
+    }
+
+    #go-button {
+      padding: 5px 10px;
+      background-color: #555;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #content {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="search-bar">
+    <input type="text" id="address-bar" placeholder="Enter URL">
+    <button id="go-button">Go</button>
+  </div>
+  <div id="content"></div>
+
+  <script>
+    const addressBar = document.getElementById('address-bar');
+    const goButton = document.getElementById('go-button');
+    const contentDiv = document.getElementById('content');
+
+    goButton.addEventListener('click', () => {
+      const url = addressBar.value;
+      contentDiv.innerHTML = `<iframe src="${url}"></iframe>`;
+    });
+  </script>
+</body>
+</html>
