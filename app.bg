@@ -82,7 +82,6 @@
   <div id="internet-popup" class="popup">
     <p>No internet connection.</p>
   </div>
-
 <script>
   const addressBar = document.getElementById('address-bar');
   const goButton = document.getElementById('go-button');
@@ -92,7 +91,12 @@
   const internetPopup = document.getElementById('internet-popup');
 
   goButton.addEventListener('click', () => {
-    const url = addressBar.value;
+    let url = addressBar.value.trim();
+    
+    if (url !== '' && !url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'http://' + url; // Adding "http://" by default
+    }
+    
     if (isValidUrl(url)) {
       errorMessage.style.display = 'none';
       loadingMessage.style.display = 'block';
@@ -103,11 +107,7 @@
         loadingMessage.style.display = 'none';
       });
     } else {
-      if (url.trim() !== '' && !url.startsWith('http://') && !url.startsWith('https://')) {
-        errorMessage.textContent = 'Invalid URL. Please use "http://" or "https://".';
-      } else {
-        errorMessage.textContent = 'Invalid URL. Please enter a valid URL.';
-      }
+      errorMessage.textContent = 'Invalid URL. Please enter a valid URL.';
       errorMessage.style.display = 'block';
       loadingMessage.style.display = 'none';
       contentDiv.innerHTML = ''; // Clear content if URL is invalid
@@ -145,6 +145,7 @@
   addressBar.value = 'https://www.bing.com';
   goButton.click(); // Load example.com on startup
 </script>
+
 
 
 
