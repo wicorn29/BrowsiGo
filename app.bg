@@ -1,155 +1,92 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>BrowsiGO</title>
+  <title>BrowsiGo: Start</title>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      font-family: Arial, sans-serif;
-    }
+/* Center the page content both horizontally and vertically */
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: Arial, sans-serif;
+}
 
-    #search-bar {
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      background-color: #333;
-      color: white;
-    }
+/* Styling for various elements */
+#progress-container {
+  width: 50%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+}
 
-    #address-bar {
-      flex: 1;
-      padding: 5px;
-    }
+#progress-bar {
+  width: 0;
+  height: 20px;
+  background-color: #4caf50;
+  border-radius: 5px;
+  transition: width 0.5s;
+}
 
-    #go-button {
-      padding: 5px 10px;
-      background-color: #555;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+#error-message {
+  color: red;
+  display: none;
+}
 
-    #content {
-      flex: 1;
-      overflow: hidden;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-
-    #error-message,
-    #loading-message,
-    #internet-popup {
-      display: none;
-      color: red;
-      text-align: center;
-      padding: 10px;
-      font-weight: bold;
-    }
-
-    /* Popup styles */
-    .popup {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: white;
-      font-size: 24px;
-      text-align: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
   </style>
 </head>
 <body>
-  <div id="search-bar">
-    <input type="text" id="address-bar" placeholder="Enter URL">
-    <button id="go-button">Go</button>
+  <!-- Displayed messages and progress bar container -->
+  <div id="message">
+    <h2>Loading core elements...</h2>
   </div>
-  <div id="content"></div>
-  <div id="error-message">Invalid URL. Please enter a valid URL.</div>
-  <div id="loading-message">Loading...</div>
-  <div id="internet-popup" class="popup">
-    <p>No internet connection.</p>
+  <div id="progress-container">
+    <div id="progress-bar"></div>
   </div>
-<script>
-  const addressBar = document.getElementById('address-bar');
-  const goButton = document.getElementById('go-button');
-  const contentDiv = document.getElementById('content');
-  const errorMessage = document.getElementById('error-message');
-  const loadingMessage = document.getElementById('loading-message');
-  const internetPopup = document.getElementById('internet-popup');
+  <div id="error-message">Please connect to the internet.</div>
 
-  goButton.addEventListener('click', () => {
-    let url = addressBar.value.trim();
-    
-    if (url !== '' && !url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'http://' + url; // Adding "http://" by default
+  <script>
+    // JavaScript code for controlling the page behavior
+    const progressBar = document.getElementById('progress-bar');
+    const errorMessage = document.getElementById('error-message');
+
+    let progress = 0;
+    const maxProgress = 100;
+    const progressIncrement = 5;
+
+    function updateProgress() {
+      // Increment the progress and update the progress bar width
+      if (progress < maxProgress) {
+        progress += progressIncrement;
+        progressBar.style.width = `${progress}%`;
+        // Recursively call this function with a delay
+        setTimeout(updateProgress, 500);
+      } else {
+        // When progress reaches 100%, update message and redirect
+        document.getElementById('message').innerHTML = '<h2>Please wait...</h2>';
+        setTimeout(() => {
+          window.location.href = 'https://htmlpreview.github.io/?https://github.com/wicorn29/BrowsiGo/blob/main/browser.bg'; // Redirect URL when download is done
+        }, 1000);
+      }
     }
-    
-    if (isValidUrl(url)) {
-      errorMessage.style.display = 'none';
-      loadingMessage.style.display = 'block';
-      contentDiv.innerHTML = `<iframe src="${url}" style="width: 100%; height: 100%; border: none;"></iframe>`;
-      
-      const iframe = contentDiv.querySelector('iframe');
-      iframe.addEventListener('load', () => {
-        loadingMessage.style.display = 'none';
-      });
-    } else {
-      errorMessage.textContent = 'Invalid URL. Please enter a valid URL.';
-      errorMessage.style.display = 'block';
-      loadingMessage.style.display = 'none';
-      contentDiv.innerHTML = ''; // Clear content if URL is invalid
+
+    function checkInternetConnection() {
+      // Check if there's an active internet connection
+      if (!navigator.onLine) {
+        errorMessage.style.display = 'block';
+        progressBar.style.display = 'none';
+      } else {
+        // If there's a connection, hide error message, show progress bar, and start updating progress
+        errorMessage.style.display = 'none';
+        progressBar.style.display = 'block';
+        updateProgress();
+      }
     }
-  });
 
-  // Helper function to check if URL is valid
-  function isValidUrl(url) {
-    try {
-      new URL(url);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  // Check for internet connectivity
-  function checkInternet() {
-    const url = 'https://www.github.com'; // Replace with your preferred URL for testing connectivity
-    fetch(url, { method: 'HEAD', mode: 'no-cors' })
-      .then(() => {
-        // Internet connection is available
-        internetPopup.style.display = 'none';
-      })
-      .catch(() => {
-        // No internet connection
-        internetPopup.style.display = 'flex';
-      });
-  }
-
-  // Call the checkInternet function every second
-  setInterval(checkInternet, 1000);
-
-  // Set homepage to example.com
-  addressBar.value = 'https://www.bing.com';
-  goButton.click(); // Load example.com on startup
-</script>
-
-
-
-
-
-
+    // Check for internet connection every second
+    setInterval(checkInternetConnection, 1000);
+  </script>
 </body>
 </html>
